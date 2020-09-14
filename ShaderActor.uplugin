@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 0,
+	"VersionName": "",
+	"FriendlyName": "ShaderActorDemo",
+	"Description": "UE4.16",
+	"Category": "CustomShader",
+	"CreatedBy": "UnrealEngine",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "ShaderActor",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		}
+	]
+}
