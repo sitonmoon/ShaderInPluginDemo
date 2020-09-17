@@ -1,5 +1,5 @@
 # ShaderInPluginDemo
-![](https://github.com/sitonmoon/ShaderInPluginDemo/demo.png)
+![](https://github.com/sitonmoon/ShaderInPluginDemo/blob/master/demo.png)
 
 ShaderActor自定义Shader插件学习版 
 适用引擎版本：UE4.16 （下载版和源码版均可以）
