@@ -1,5 +1,6 @@
 # ShaderInPluginDemo UE4.16,4.23
-![](https://github.com/sitonmoon/ShaderInPluginDemo/demo.png)
+![](https://github.com/sitonmoon/ShaderInPluginDemo/blob/UE4.23/demo.png)
+![](https://github.com/sitonmoon/ShaderInPluginDemo/blob/UE4.23/demo2.png)
 
 ShaderActor自定义Shader插件学习版 
 适用引擎版本：UE4.16,4.23（下载版和源码版均可以）
