@@ -1,11 +1,12 @@
+#include "ShaderActorPrivatePCH.h"
 #include "ShaderActor.h"
 #include "Public/PipelineStateCache.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, ShaderActor, "ShaderActor");
-
-
-TGlobalResource<FTextureVertexDeclaration> GTextureVertexDeclaration;
-
+//--UE4.16
+//IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, ShaderActor, "ShaderActor");
+//TGlobalResource<FTextureVertexDeclaration> GTextureVertexDeclaration;
+//--UE4.23
+TGlobalResource<FSimpleScreenVertexBuffer> GSimpleScreenVertexBuffer;
 
 AShaderActor::AShaderActor(class FObjectInitializer const &ObjectInitializer): Super(ObjectInitializer)
 {
@@ -24,7 +25,7 @@ AShaderActor::AShaderActor(class FObjectInitializer const &ObjectInitializer): S
 
 AShaderActor::~AShaderActor()
 {
-	bIsUnloading = true;
+	bIsUnloading = true; 
 }
 
 
@@ -76,11 +77,21 @@ void AShaderActor::ExecutePixelShader(FVector4 EndColor, float TextureParameterB
 	VariableParameters.EndColor = EndColor;
 	VariableParameters.TextureParameterBlendFactor = TextureParameterBlendFactor;
 
+	
+	/*//--UE4.16
 	ENQUEUE_UNIQUE_RENDER_COMMAND_ONEPARAMETER(
 		FPixelShaderRunner,
 		AShaderActor*, PixelShader, this,
 		{
 			PixelShader->ExecutePixelShaderInternal();
+		}
+	);
+	*/
+	//--UE4.23
+	ENQUEUE_RENDER_COMMAND(FPixelShaderRunner)([this](
+		FRHICommandListImmediate& RHICmdList)
+		{
+			this->ExecutePixelShaderInternal();
 		}
 	);
 }
@@ -104,7 +115,12 @@ void AShaderActor::ExecutePixelShaderInternal()
 
 	//This is where the magic happens
 	CurrentTexture = RenderTarget->GetRenderTargetResource()->GetRenderTargetTexture();
-	SetRenderTarget(RHICmdList, CurrentTexture, FTextureRHIRef());
+	
+	//--UE4.16
+	//SetRenderTarget(RHICmdList, CurrentTexture, FTextureRHIRef());
+	//--UE4.23
+	FRHIRenderPassInfo RPInfo(CurrentTexture, ERenderTargetActions::Load_Store);
+	RHICmdList.BeginRenderPass(RPInfo, TEXT("ShaderActor"));
 
 	TShaderMapRef<FVertexShaderExample> VertexShader(GetGlobalShaderMap(FeatureLevel));
 	TShaderMapRef<FPixelShaderDeclaration> PixelShader(GetGlobalShaderMap(FeatureLevel));
@@ -114,8 +130,8 @@ void AShaderActor::ExecutePixelShaderInternal()
 	GraphicsPSOInit.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
 	GraphicsPSOInit.BlendState = TStaticBlendState<>::GetRHI();
 	GraphicsPSOInit.RasterizerState = TStaticRasterizerState<FM_Solid, CM_None>::GetRHI();
-	GraphicsPSOInit.PrimitiveType = PT_TriangleList;
-	GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GTextureVertexDeclaration.VertexDeclarationRHI;
+	GraphicsPSOInit.PrimitiveType = PT_TriangleStrip;
+	GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GFilterVertexDeclaration.VertexDeclarationRHI;
 	GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VertexShader);
 	GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PixelShader);
 	SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
@@ -123,18 +139,22 @@ void AShaderActor::ExecutePixelShaderInternal()
 	PixelShader->SetSurfaces(RHICmdList, TextureParameterSRV);
 	PixelShader->SetUniformBuffers(RHICmdList, ConstantParameters, VariableParameters);
 
-	// Draw a fullscreen quad that we can run our pixel shader on
-	FTextureVertex Vertices[4];
-	Vertices[0].Position = FVector4(-1.0f, 1.0f, 0, 1.0f);
-	Vertices[1].Position = FVector4(1.0f, 1.0f, 0, 1.0f);
-	Vertices[2].Position = FVector4(-1.0f, -1.0f, 0, 1.0f);
-	Vertices[3].Position = FVector4(1.0f, -1.0f, 0, 1.0f);
-	Vertices[0].UV = FVector2D(0, 0);
-	Vertices[1].UV = FVector2D(1, 0);
-	Vertices[2].UV = FVector2D(0, 1);
-	Vertices[3].UV = FVector2D(1, 1);
+	//--UE4.16
+	//// Draw a fullscreen quad that we can run our pixel shader on
+	//FTextureVertex Vertices[4];
+	//Vertices[0].Position = FVector4(-1.0f, 1.0f, 0, 1.0f);
+	//Vertices[1].Position = FVector4(1.0f, 1.0f, 0, 1.0f);
+	//Vertices[2].Position = FVector4(-1.0f, -1.0f, 0, 1.0f);
+	//Vertices[3].Position = FVector4(1.0f, -1.0f, 0, 1.0f);
+	//Vertices[0].UV = FVector2D(0, 0);
+	//Vertices[1].UV = FVector2D(1, 0);
+	//Vertices[2].UV = FVector2D(0, 1);
+	//Vertices[3].UV = FVector2D(1, 1);
+	//DrawPrimitiveUP(RHICmdList, PT_TriangleStrip, 2, Vertices, sizeof(Vertices[0]));
+	//--UE4.23
+	//RHICmdList.SetViewport(0, 0, 0.0f, CurrentTexture->GetSizeX(), CurrentTexture->GetSizeY(), 1.0f);
+	RHICmdList.SetStreamSource(0, GSimpleScreenVertexBuffer.VertexBufferRHI, 0);
+	RHICmdList.DrawPrimitive(0, 2, 1);
 
-	DrawPrimitiveUP(RHICmdList, PT_TriangleStrip, 2, Vertices, sizeof(Vertices[0]));
-
-
+	RHICmdList.EndRenderPass();
 }

@@ -5,8 +5,12 @@
 
 //These are needed to actually implement the constant buffers so they are available inside our shader
 //They also need to be unique over the entire solution since they can in fact be accessed from any shader
-IMPLEMENT_UNIFORM_BUFFER_STRUCT(FPixelShaderConstantParameters, TEXT("PSConstant"))
-IMPLEMENT_UNIFORM_BUFFER_STRUCT(FPixelShaderVariableParameters, TEXT("PSVariable"))
+//--UE4.16
+//IMPLEMENT_UNIFORM_BUFFER_STRUCT(FPixelShaderConstantParameters, TEXT("PSConstant"))
+//IMPLEMENT_UNIFORM_BUFFER_STRUCT(FPixelShaderVariableParameters, TEXT("PSVariable"))
+//--UE4.23
+IMPLEMENT_GLOBAL_SHADER_PARAMETER_STRUCT(FPixelShaderConstantParameters, "PSConstant");
+IMPLEMENT_GLOBAL_SHADER_PARAMETER_STRUCT(FPixelShaderVariableParameters, "PSVariable");
 
 FPixelShaderDeclaration::FPixelShaderDeclaration(const
         ShaderMetaType::CompiledShaderInitializerType& Initializer)
@@ -57,8 +61,8 @@ void FPixelShaderDeclaration::UnbindBuffers(FRHICommandList& RHICmdList) {
 }
 
 //This is what will instantiate the shader into the engine from the engine/Shaders folder
-//从引擎shader文件夹载入ShaderExample.usf文件(在项目启动时加载)
-IMPLEMENT_SHADER_TYPE(, FVertexShaderExample, TEXT("ShaderExample"),
+//                      ShaderType               ShaderFileName     Shader function name  
+IMPLEMENT_SHADER_TYPE(, FVertexShaderExample, TEXT("/ShaderInPugin/Private/ShaderExample.usf"),
                       TEXT("MainVertexShader"), SF_Vertex);
-IMPLEMENT_SHADER_TYPE(, FPixelShaderDeclaration, TEXT("ShaderExample"),
+IMPLEMENT_SHADER_TYPE(, FPixelShaderDeclaration, TEXT("/ShaderInPugin/Private/ShaderExample.usf"),
                       TEXT("MainPixelShader"), SF_Pixel);

@@ -52,5 +52,4 @@ private:
 
 	/** Since we are only reading from the resource, we do not need a UAV; an SRV is sufficient */
 	FShaderResourceViewRHIRef TextureParameterSRV;
-
 };
