@@ -3,10 +3,13 @@
 ![](https://github.com/sitonmoon/ShaderInPluginDemo/blob/UE4.23/demo2.png)
 
 ShaderActor自定义Shader插件学习版 
+
 适用引擎版本：UE4.16,4.23（下载版和源码版均可以）
+
 游戏开发爱好者交流群：1101298523
 
 更新日志：
+
 UE4.16:
 初始版本，务必将Shader文件夹中的.usf文件放到引擎的Shaders目录下！！
 
